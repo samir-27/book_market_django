@@ -27,14 +27,18 @@ def book_list(request):
 def book_detail(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     
-    # Check if the currently logged-in user has this book in their wishlist
     in_wishlist = False
+    in_cart = False
+    
     if request.user.is_authenticated:
         in_wishlist = Wishlist.objects.filter(user=request.user, book=book).exists()
+        # Check if the user already has this specific book in their cart
+        in_cart = CartItem.objects.filter(user=request.user, book=book).exists()
         
     return render(request, 'marketplace/book_detail.html', {
         'book': book, 
-        'in_wishlist': in_wishlist
+        'in_wishlist': in_wishlist,
+        'in_cart': in_cart 
     })
 
 def register_view(request):
@@ -88,18 +92,19 @@ def sell_book(request):
 @login_required
 def toggle_wishlist(request, book_id):
     book = get_object_or_404(Book, id=book_id)
-    
-    # Look for an existing wishlist entry for this user and book
     wishlist_item = Wishlist.objects.filter(user=request.user, book=book).first()
     
     if wishlist_item:
-        # If it exists, remove it (toggle off)
         wishlist_item.delete()
     else:
-        # If it doesn't exist, create it (toggle on)
         Wishlist.objects.create(user=request.user, book=book)
         
-    return redirect('book_detail', book_id=book.id)
+    # NEW: Redirect back to the previous page (HTTP_REFERER), not always to book_detail.
+    # This allows users to click "Remove" from the Wishlist page itself!
+    previous_url = request.META.get('HTTP_REFERER', 'book_list')
+    return redirect(previous_url)
+
+
 
 @login_required
 def my_wishlist(request):
@@ -108,6 +113,11 @@ def my_wishlist(request):
     wishlist_items = Wishlist.objects.filter(user=request.user).select_related('book').order_by('-added_at')
     return render(request, 'marketplace/wishlist.html', {'wishlist_items': wishlist_items})
 
+@login_required
+def my_listings(request):
+    # Fetch all books listed by the current user, newest first
+    books = Book.objects.filter(seller=request.user).order_by('-created_at')
+    return render(request, 'marketplace/my_listings.html', {'books': books})
 
 
 @login_required
@@ -135,6 +145,36 @@ def buy_book(request, book_id):
         return redirect('order_history')
         
     return redirect('book_list')
+
+@login_required
+def edit_book(request, book_id):
+    # seller=request.user ensures users cannot edit someone else's book
+    book = get_object_or_404(Book, id=book_id, seller=request.user)
+    
+    if request.method == 'POST':
+        # 'instance=book' tells Django to UPDATE the existing book instead of creating a new one
+        form = BookForm(request.POST, request.FILES, instance=book)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'"{book.title}" updated successfully!')
+            return redirect('book_detail', book_id=book.id)
+    else:
+        # Pre-populate the form with existing data
+        form = BookForm(instance=book)
+        
+    return render(request, 'marketplace/edit_book.html', {'form': form, 'book': book})
+
+@login_required
+def delete_book(request, book_id):
+    if request.method == 'POST':
+        # Ensure only the owner can delete the book
+        book = get_object_or_404(Book, id=book_id, seller=request.user)
+        title = book.title
+        book.delete()
+        messages.success(request, f'"{title}" was successfully deleted.')
+        return redirect('my_listings')
+        
+    return redirect('my_listings')
 
 @login_required
 def order_history(request):
@@ -183,30 +223,27 @@ def view_cart(request):
 def checkout_cart(request):
     if request.method == 'POST':
         cart_items = CartItem.objects.filter(user=request.user).select_related('book')
-        
         if not cart_items:
             return redirect('view_cart')
             
         successful_orders = 0
-        
         for item in cart_items:
-            # Critical check: Did someone else buy it while it was sitting in our cart?
             if not item.book.is_sold:
-                # 1. Create the Order
                 Order.objects.create(
                     book=item.book,
                     buyer=request.user,
                     seller=item.book.seller,
                     purchase_price=item.book.price
                 )
-                # 2. Mark book as sold
                 item.book.is_sold = True
                 item.book.save()
+                
+                # <-- NEW: Remove this book from EVERYONE'S wishlist because it's sold!
+                Wishlist.objects.filter(book=item.book).delete()
+                
                 successful_orders += 1
                 
-        # Clear the user's cart entirely after checkout attempt
         cart_items.delete()
-        
         if successful_orders > 0:
             messages.success(request, f"Successfully purchased {successful_orders} books!")
         else:

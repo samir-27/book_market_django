@@ -7,6 +7,9 @@ urlpatterns = [
     path('', views.book_list, name='book_list'),
     path('book/<int:book_id>/', views.book_detail, name='book_detail'),
     path('sell/', views.sell_book, name='sell_book'),
+    path('my-listings/', views.my_listings, name='my_listings'),
+    path('book/<int:book_id>/edit/', views.edit_book, name='edit_book'),
+    path('book/<int:book_id>/delete/', views.delete_book, name='delete_book'),
 
     path('wishlist/', views.my_wishlist, name='my_wishlist'),
     path('book/<int:book_id>/wishlist/', views.toggle_wishlist, name='toggle_wishlist'),

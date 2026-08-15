@@ -23,8 +23,14 @@
                 <small class="text-muted mt-2">Added on: {{ item.added_at.strftime('%b %d, %Y') }}</small>
             </div>
             
-            <div class="card-footer bg-white border-top-0 mt-auto">
+<div class="card-footer bg-white border-top-0 mt-auto">
                 <a href="{{ url('book_detail', args=[item.book.id]) }}" class="btn btn-outline-primary w-100">View Details</a>
+                
+                <!-- NEW REMOVE BUTTON -->
+                <form action="{{ url('toggle_wishlist', args=[item.book.id]) }}" method="POST" class="mt-2">
+                    {{ csrf_input }}
+                    <button type="submit" class="btn btn-outline-danger w-100">💔 Remove</button>
+                </form>
             </div>
         </div>
     </div>
