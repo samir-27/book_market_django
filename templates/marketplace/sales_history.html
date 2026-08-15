@@ -2,34 +2,126 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2 class="mb-4">My Sales History</h2>
 
-<div class="bg-white p-4 shadow-sm rounded">
+<style>
+    /* Reusing the modern dashboard table styles */
+    .dashboard-table-card {
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        overflow: hidden;
+    }
+    
+    .table-modern {
+        margin-bottom: 0;
+    }
+    
+    .table-modern thead th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem 1.5rem;
+    }
+    
+    .table-modern tbody td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+    
+    .table-modern tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table-modern tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table-modern tbody tr:hover {
+        background-color: #f8fafc;
+    }
+</style>
+
+<!-- Header Section -->
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-3 border-bottom gap-3">
+    <h2 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="letter-spacing: -0.5px;">
+        <i class="bi bi-graph-up-arrow text-success"></i> My Sales History
+    </h2>
+    <a href="{{ url('my_listings') }}" class="btn btn-light rounded-pill fw-medium border shadow-sm">
+        <i class="bi bi-journals me-1"></i> View Active Listings
+    </a>
+</div>
+
+<!-- Sales Content -->
+<div class="dashboard-table-card">
     {% if sales %}
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
+            <table class="table table-borderless table-modern">
+                <thead>
                     <tr>
                         <th>Book Sold</th>
                         <th>Buyer</th>
                         <th>Earnings</th>
-                        <th>Date</th>
+                        <th class="text-end">Date of Sale</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for sale in sales %}
                     <tr>
-                        <td><a href="{{ url('book_detail', args=[sale.book.id]) }}" class="text-decoration-none fw-bold">{{ sale.book.title }}</a></td>
-                        <td>{{ sale.buyer.username }}</td>
-                        <td class="text-primary">${{ sale.purchase_price }}</td>
-                        <td>{{ sale.purchase_date.strftime('%b %d, %Y') }}</td>
+                        <!-- Book Column -->
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-book-half text-secondary"></i>
+                                </div>
+                                <a href="{{ url('book_detail', args=[sale.book.id]) }}" class="text-dark text-decoration-none fw-bold hover-primary" style="font-size: 0.95rem;">
+                                    {{ sale.book.title }}
+                                </a>
+                            </div>
+                        </td>
+                        
+                        <!-- Buyer Column -->
+                        <td>
+                            <div class="d-flex align-items-center text-secondary">
+                                <i class="bi bi-person-circle me-2 fs-5"></i> 
+                                <span class="fw-medium">{{ sale.buyer.username }}</span>
+                            </div>
+                        </td>
+                        
+                        <!-- Earnings Column -->
+                        <td>
+                            <span class="fw-bold text-success" style="font-size: 1.1rem; letter-spacing: -0.5px;">
+                                +${{ sale.purchase_price }}
+                            </span>
+                        </td>
+                        
+                        <!-- Date Column -->
+                        <td class="text-end text-secondary" style="font-size: 0.9rem;">
+                            {{ sale.purchase_date.strftime('%b %d, %Y') }}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     {% else %}
-        <div class="alert alert-info mb-0">You haven't sold any books yet!</div>
+        <!-- Modern Empty State -->
+        <div class="text-center p-5">
+            <div class="d-inline-block p-4 rounded-circle mb-3" style="background-color: #f0fdf4;">
+                <i class="bi bi-receipt text-success" style="font-size: 3rem;"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-2">No sales yet</h3>
+            <p class="text-secondary mb-4">You haven't sold any books yet. Keep your listings competitive to attract buyers!</p>
+            <a href="{{ url('sell_book') }}" class="btn btn-accent rounded-pill px-4 py-2 fw-medium shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> List Another Book
+            </a>
+        </div>
     {% endif %}
 </div>
+
 {% endblock %}

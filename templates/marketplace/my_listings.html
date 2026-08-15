@@ -2,24 +2,97 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>My Book Listings</h2>
-    <a href="{{ url('sell_book') }}" class="btn btn-warning fw-bold">+ List New Book</a>
+
+<style>
+    /* Modern Dashboard Table Styles */
+    .dashboard-table-card {
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        overflow: hidden;
+    }
+    
+    .table-modern {
+        margin-bottom: 0;
+    }
+    
+    .table-modern thead th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem 1.5rem;
+    }
+    
+    .table-modern tbody td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+    
+    .table-modern tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table-modern tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table-modern tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    /* Soft Badges */
+    .badge-soft-success {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .badge-soft-secondary {
+        background-color: rgba(100, 116, 139, 0.1);
+        color: #475569;
+        border: 1px solid rgba(100, 116, 139, 0.2);
+    }
+
+    /* Action Icons */
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+</style>
+
+<!-- Header Section -->
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 pb-3 border-bottom gap-3">
+    <h2 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="letter-spacing: -0.5px;">
+        <i class="bi bi-journals" style="color: var(--theme-primary);"></i> My Book Listings
+    </h2>
+    <a href="{{ url('sell_book') }}" class="btn btn-accent rounded-pill fw-semibold px-4 shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> List New Book
+    </a>
 </div>
 
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-{% endif %}
 
-<div class="bg-white p-4 shadow-sm rounded">
+<!-- Listings Content -->
+<div class="dashboard-table-card">
     {% if books %}
         <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
+            <table class="table table-borderless table-modern">
+                <thead>
                     <tr>
-                        <th>Cover</th>
+                        <th style="width: 80px;">Cover</th>
                         <th>Title & Author</th>
                         <th>Price</th>
                         <th>Condition</th>
@@ -29,41 +102,72 @@
                 </thead>
                 <tbody>
                     {% for book in books %}
-                    <tr>
-                        <td style="width: 70px;">
+                    <tr class="{% if book.is_sold %}opacity-75{% endif %}">
+                        
+                        <!-- Image Column -->
+                        <td>
                             {% if book.photo %}
-                                <img src="{{ book.photo.url }}" style="width: 50px; height: 70px; object-fit: cover;" class="rounded">
+                                <img src="{{ book.photo.url }}" class="rounded-3 shadow-sm object-fit-cover" style="width: 48px; height: 64px;" alt="{{ book.title }}">
                             {% else %}
-                                <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 70px; font-size: 10px;">
-                                    No Cover
+                                <div class="bg-light text-muted rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 64px;">
+                                    <i class="bi bi-image fs-5"></i>
                                 </div>
                             {% endif %}
                         </td>
+                        
+                        <!-- Title & Author Column -->
                         <td>
-                            <a href="{{ url('book_detail', args=[book.id]) }}" class="text-decoration-none fw-bold">{{ book.title }}</a>
-                            <br>
-                            <small class="text-muted">by {{ book.author }}</small>
+                            <a href="{{ url('book_detail', args=[book.id]) }}" class="text-dark text-decoration-none fw-bold hover-primary d-block mb-1" style="font-size: 0.95rem;">
+                                {{ book.title }}
+                            </a>
+                            <div class="text-secondary small">
+                                <i class="bi bi-pen me-1"></i>{{ book.author }}
+                            </div>
                         </td>
-                        <td>${{ book.price }}</td>
-                        <td><span class="badge bg-secondary">{{ book.get_condition_display() }}</span></td>
+                        
+                        <!-- Price Column -->
+                        <td>
+                            <span class="fw-bold" style="color: var(--theme-primary); font-size: 1.1rem;">${{ book.price }}</span>
+                        </td>
+                        
+                        <!-- Condition Column -->
+                        <td>
+                            <span class="badge bg-light text-dark border px-2 py-1 rounded-pill fw-medium">
+                                {{ book.get_condition_display() }}
+                            </span>
+                        </td>
+                        
+                        <!-- Status Column -->
                         <td>
                             {% if book.is_sold %}
-                                <span class="badge bg-danger">Sold</span>
+                                <span class="badge badge-soft-secondary rounded-pill px-3 py-2 fw-semibold">
+                                    <i class="bi bi-check2-circle me-1"></i> Sold
+                                </span>
                             {% else %}
-                                <span class="badge bg-success">Active</span>
+                                <span class="badge badge-soft-success rounded-pill px-3 py-2 fw-semibold">
+                                    <i class="bi bi-broadcast me-1"></i> Active
+                                </span>
                             {% endif %}
                         </td>
-                        <td class="text-end">
-                            <div class="d-inline-flex gap-1">
-                                <a href="{{ url('book_detail', args=[book.id]) }}" class="btn btn-sm btn-outline-primary" title="View">View</a>
+                        
+                        <!-- Actions Column -->
+                        <td class="text-end text-nowrap">
+                            <div class="d-inline-flex gap-2">
+                                <a href="{{ url('book_detail', args=[book.id]) }}" class="btn btn-light border action-btn text-primary shadow-sm" title="View Listing">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
                                 
                                 {% if not book.is_sold %}
-                                    <a href="{{ url('edit_book', args=[book.id]) }}" class="btn btn-sm btn-outline-secondary" title="Edit">Edit</a>
+                                    <a href="{{ url('edit_book', args=[book.id]) }}" class="btn btn-light border action-btn text-secondary shadow-sm" title="Edit Listing">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
                                 {% endif %}
                                 
                                 <form action="{{ url('delete_book', args=[book.id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this listing?');">
                                     {{ csrf_input }}
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">Delete</button>
+                                    <button type="submit" class="btn btn-light border action-btn text-danger shadow-sm" title="Delete Listing">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
                                 </form>
                             </div>
                         </td>
@@ -73,9 +177,18 @@
             </table>
         </div>
     {% else %}
-        <div class="alert alert-info mb-0">
-            You haven't listed any books yet. <a href="{{ url('sell_book') }}">Start selling now!</a>
+        <!-- Modern Empty State -->
+        <div class="text-center p-5">
+            <div class="d-inline-block p-4 rounded-circle mb-3" style="background-color: var(--theme-bg);">
+                <i class="bi bi-inboxes text-secondary" style="font-size: 3rem;"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-2">No active listings</h3>
+            <p class="text-secondary mb-4">You haven't listed any books for sale yet. Turn your old books into cash!</p>
+            <a href="{{ url('sell_book') }}" class="btn btn-accent rounded-pill px-5 py-2 fw-medium shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Start Selling Now
+            </a>
         </div>
     {% endif %}
 </div>
+
 {% endblock %}

@@ -1,22 +1,111 @@
+<!-- templates/marketplace/register.html -->
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm mt-5">
-            <div class="card-body">
-                <h3 class="card-title text-center mb-4">Create an Account</h3>
-                <form method="POST">
+
+<style>
+    /* 
+       Magic CSS to style Django's default form.as_p() output 
+       so it looks exactly like modern Bootstrap inputs!
+       (If you ever create a custom CSS file, you can move this there 
+       so both login and register can share it!)
+    */
+    .django-modern-form p {
+        margin-bottom: 1.25rem;
+    }
+    
+    .django-modern-form label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #475569;
+        font-size: 0.9rem;
+    }
+    
+    .django-modern-form input[type="text"],
+    .django-modern-form input[type="password"],
+    .django-modern-form input[type="email"] {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        color: #334155;
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .django-modern-form input:focus {
+        border-color: var(--theme-primary);
+        background-color: #ffffff;
+        outline: 0;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+    }
+    
+    .django-modern-form .helptext {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 0.4rem;
+        display: block;
+        line-height: 1.4;
+    }
+    
+    .django-modern-form ul.errorlist {
+        color: #ef4444; /* Red for errors */
+        font-size: 0.85rem;
+        list-style: none;
+        padding-left: 0;
+        margin-top: 0.5rem;
+        background-color: #fef2f2;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        border-left: 3px solid #ef4444;
+    }
+</style>
+
+<div class="row justify-content-center align-items-center mb-5" style="min-height: 60vh;">
+    <div class="col-12 col-md-8 col-lg-5">
+        
+        <!-- Welcome Header -->
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-white rounded-circle shadow-sm mb-3" style="width: 70px; height: 70px; border: 2px solid var(--theme-bg);">
+                <i class="bi bi-person-plus-fill" style="font-size: 2.5rem; color: var(--theme-primary);"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-1">Create an Account</h3>
+            <p class="text-secondary">Join our community to buy and sell books.</p>
+        </div>
+
+        <!-- Registration Card -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <!-- Optional subtle top border accent -->
+            <div style="height: 4px; background-color: var(--theme-primary); width: 100%;"></div>
+            
+            <div class="card-body p-4 p-sm-5">
+                
+                <form method="POST" class="django-modern-form">
                     {{ csrf_input }}
-                    <!-- form.as_p() renders the Django form, safe tells Jinja2 it's safe HTML -->
+                    
                     {{ form.as_p() | safe }}
-                    <button type="submit" class="btn btn-primary w-100 mt-3">Register</button>
+                    
+                    <button type="submit" class="btn text-white w-100 rounded-pill py-3 mt-4 fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2" style="background-color: var(--theme-primary); font-size: 1.05rem;">
+                        <span>Register Now</span> <i class="bi bi-arrow-right"></i>
+                    </button>
                 </form>
-                <p class="text-center mt-3">
-                    Already have an account? <a href="{{ url('login') }}">Log in here</a>.
+                
+            </div>
+            
+            <!-- Footer Area inside the card -->
+            <div class="card-footer bg-light border-0 text-center py-4">
+                <p class="mb-0 text-secondary">
+                    Already have an account? 
+                    <a href="{{ url('login') }}" class="fw-bold text-decoration-none hover-primary" style="color: var(--theme-primary);">
+                        Log in here
+                    </a>
                 </p>
             </div>
         </div>
+        
     </div>
 </div>
+
 {% endblock %}

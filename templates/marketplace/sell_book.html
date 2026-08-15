@@ -1,34 +1,124 @@
+<!-- templates/marketplace/sell_book.html -->
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm mt-4 mb-5">
-            <div class="card-body p-4">
-                <h3 class="card-title mb-4">List a Book for Sale</h3>
+
+<style>
+    /* Modern Form Controls for Inputs, Selects, and Textareas */
+    .django-modern-form input[type="text"],
+    .django-modern-form input[type="number"],
+    .django-modern-form input[type="file"],
+    .django-modern-form select,
+    .django-modern-form textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        color: #334155;
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    /* Focus States */
+    .django-modern-form input:focus,
+    .django-modern-form select:focus,
+    .django-modern-form textarea:focus {
+        border-color: var(--theme-primary);
+        background-color: #ffffff;
+        outline: 0;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+    }
+    
+    /* Special padding for file inputs to look neat */
+    .django-modern-form input[type="file"] {
+        padding: 0.5rem;
+        background-color: #ffffff;
+    }
+
+    .form-label {
+        color: #1e293b;
+        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+    }
+
+    /* Error and Help text styling */
+    .field-error {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+</style>
+
+<div class="row justify-content-center mb-5 mt-3">
+    <div class="col-12 col-lg-8">
+        
+        <!-- Back Navigation -->
+        <div class="mb-4">
+            <a href="{{ url('my_listings') }}" class="text-decoration-none text-muted fw-medium d-inline-flex align-items-center btn btn-link px-0 hover-primary">
+                <i class="bi bi-arrow-left-short fs-4"></i> Back to My Listings
+            </a>
+        </div>
+        
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <!-- Decorative Top Border -->
+            <div style="height: 4px; background-color: var(--theme-accent); width: 100%;"></div>
+            
+            <div class="card-body p-4 p-md-5">
                 
-                <!-- enctype is required for file uploads! -->
-                <form method="POST" enctype="multipart/form-data">
+                <!-- Header -->
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="bi bi-tags-fill fs-4 text-warning"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0 text-dark">List a Book for Sale</h3>
+                        <p class="text-secondary mb-0">Turn your old books into cash</p>
+                    </div>
+                </div>
+                
+                <!-- Form -->
+                <form method="POST" enctype="multipart/form-data" class="django-modern-form">
                     {{ csrf_input }}
                     
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">{{ field.label }}</label>
-                            {{ field | safe }}
-                            {% if field.help_text %}
-                                <div class="form-text">{{ field.help_text }}</div>
-                            {% endif %}
-                            {% for error in field.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
+                    <div class="row g-4">
+                        {% for field in form %}
+                            <!-- Make price and condition take up half width on larger screens for a cleaner layout -->
+                            <div class="col-12 {% if field.name in ['price', 'condition'] %}col-md-6{% endif %}">
+                                <label class="form-label fw-bold">{{ field.label }}</label>
+                                
+                                {{ field | safe }}
+                                
+                                {% if field.help_text %}
+                                    <div class="form-text small text-secondary mt-2">
+                                        <i class="bi bi-info-circle me-1"></i>{{ field.help_text }}
+                                    </div>
+                                {% endif %}
+                                
+                                {% for error in field.errors %}
+                                    <div class="field-error">
+                                        <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
                     
-                    <button type="submit" class="btn btn-success w-100 mt-3 fs-5">List Book</button>
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column gap-3 mt-5 pt-4 border-top">
+                        <button type="submit" class="btn text-white rounded-pill py-3 px-5 fw-bold shadow-sm flex-grow-1" style="background-color: var(--theme-accent); border: none; font-size: 1.1rem;">
+                            <i class="bi bi-plus-circle me-2"></i> Publish Listing
+                        </button>
+                    </div>
                 </form>
                 
             </div>
         </div>
+        
     </div>
 </div>
+
 {% endblock %}

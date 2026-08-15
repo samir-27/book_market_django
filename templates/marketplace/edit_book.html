@@ -2,49 +2,135 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="mb-3">
-            <a href="{{ url('my_listings') }}" class="text-decoration-none">&larr; Back to My Listings</a>
+
+<style>
+    /* Modern Form Controls for Inputs, Selects, and Textareas */
+    .django-modern-form input[type="text"],
+    .django-modern-form input[type="number"],
+    .django-modern-form input[type="file"],
+    .django-modern-form select,
+    .django-modern-form textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        color: #334155;
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    /* Focus States */
+    .django-modern-form input:focus,
+    .django-modern-form select:focus,
+    .django-modern-form textarea:focus {
+        border-color: var(--theme-primary);
+        background-color: #ffffff;
+        outline: 0;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+    }
+    
+    /* Special padding for file inputs to look neat */
+    .django-modern-form input[type="file"] {
+        padding: 0.5rem;
+        background-color: #ffffff;
+    }
+
+    .form-label {
+        color: #1e293b;
+        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+    }
+
+    /* Error and Help text styling */
+    .field-error {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+</style>
+
+<div class="row justify-content-center mb-5">
+    <div class="col-12 col-lg-8">
+        
+        <!-- Back Navigation -->
+        <div class="mb-4">
+            <a href="{{ url('my_listings') }}" class="text-decoration-none text-muted fw-medium d-inline-flex align-items-center btn btn-link px-0 hover-primary">
+                <i class="bi bi-arrow-left-short fs-4"></i> Back to My Listings
+            </a>
         </div>
         
-        <div class="card shadow-sm mb-5">
-            <div class="card-body p-4">
-                <h3 class="card-title mb-4">Edit Listing: {{ book.title }}</h3>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <!-- Decorative Top Border -->
+            <div style="height: 4px; background-color: var(--theme-accent); width: 100%;"></div>
+            
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="bi bi-pencil-square fs-4 text-secondary"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0 text-dark">Edit Listing</h3>
+                        <p class="text-secondary mb-0 text-truncate" style="max-width: 400px;">{{ book.title }}</p>
+                    </div>
+                </div>
                 
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data" class="django-modern-form">
                     {{ csrf_input }}
                     
-                    {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">{{ field.label }}</label>
-                            
-                            {% if field.name == 'photo' and book.photo %}
-                                <div class="mb-2">
-                                    <img src="{{ book.photo.url }}" style="height: 100px; object-fit: cover;" class="rounded border">
-                                    <div class="small text-muted mt-1">Current photo preview. Uploading a new file will replace it.</div>
-                                </div>
-                            {% endif %}
-                            
-                            {{ field | safe }}
-                            
-                            {% if field.help_text %}
-                                <div class="form-text">{{ field.help_text }}</div>
-                            {% endif %}
-                            
-                            {% for error in field.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
+                    <div class="row g-4">
+                        {% for field in form %}
+                            <div class="col-12 {% if field.name in ['price', 'condition'] %}col-md-6{% endif %}">
+                                <label class="form-label fw-bold">{{ field.label }}</label>
+                                
+                                <!-- Beautiful Current Photo Preview -->
+                                {% if field.name == 'photo' and book.photo %}
+                                    <div class="d-flex align-items-center p-3 mb-3 border rounded-3 bg-light">
+                                        <img src="{{ book.photo.url }}" class="rounded shadow-sm me-3 object-fit-cover" style="width: 60px; height: 80px;" alt="Current Cover">
+                                        <div>
+                                            <div class="fw-medium text-dark mb-1 d-flex align-items-center">
+                                                <i class="bi bi-image me-1"></i> Current Photo
+                                            </div>
+                                            <div class="small text-muted">Uploading a new file below will replace this image.</div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                {{ field | safe }}
+                                
+                                {% if field.help_text %}
+                                    <div class="form-text small text-secondary mt-2">
+                                        <i class="bi bi-info-circle me-1"></i>{{ field.help_text }}
+                                    </div>
+                                {% endif %}
+                                
+                                {% for error in field.errors %}
+                                    <div class="field-error">
+                                        <i class="bi bi-exclamation-circle-fill"></i> {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
                     
-                    <div class="d-flex gap-2 mt-4">
-                        <button type="submit" class="btn btn-primary flex-grow-1 fs-5">Save Changes</button>
-                        <a href="{{ url('my_listings') }}" class="btn btn-outline-secondary px-4 fs-5">Cancel</a>
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column flex-sm-row gap-3 mt-5 pt-4 border-top">
+                        <button type="submit" class="btn text-white rounded-pill py-3 px-5 fw-bold shadow-sm order-1 order-sm-2 flex-grow-1" style="background-color: var(--theme-primary); font-size: 1.05rem;">
+                            <i class="bi bi-check2-circle me-1"></i> Save Changes
+                        </button>
+                        <a href="{{ url('my_listings') }}" class="btn btn-light border rounded-pill py-3 px-4 fw-medium text-secondary order-2 order-sm-1">
+                            Cancel
+                        </a>
                     </div>
                 </form>
+                
             </div>
         </div>
+        
     </div>
 </div>
+
 {% endblock %}
