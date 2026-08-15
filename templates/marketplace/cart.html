@@ -1,0 +1,67 @@
+<!-- templates/marketplace/cart.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">Shopping Cart 🛒</h2>
+
+<!-- Display Django messages (success/error alerts) -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ 'success' if message.tags == 'success' else 'warning' }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<div class="row">
+    <div class="col-md-8">
+        {% if cart_items %}
+            <div class="list-group mb-4">
+                {% for item in cart_items %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center p-3">
+                        <div class="d-flex align-items-center">
+                            {% if item.book.photo %}
+                                <img src="{{ item.book.photo.url }}" style="width: 60px; height: 80px; object-fit: cover;" class="me-3 rounded">
+                            {% endif %}
+                            <div>
+                                <h5 class="mb-1"><a href="{{ url('book_detail', args=[item.book.id]) }}" class="text-decoration-none">{{ item.book.title }}</a></h5>
+                                <small class="text-muted">Seller: {{ item.book.seller.username }}</small>
+                                {% if item.book.is_sold %}
+                                    <br><span class="badge bg-danger mt-1">Sorry, this item just sold!</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <h5 class="text-primary mb-2">${{ item.book.price }}</h5>
+                            <form action="{{ url('remove_from_cart', args=[item.id]) }}" method="POST">
+                                {{ csrf_input }}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">Your cart is empty.</div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="card-title mb-4">Order Summary</h4>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Total:</span>
+                    <strong>${{ total_price }}</strong>
+                </div>
+                {% if cart_items %}
+                    <form action="{{ url('checkout_cart') }}" method="POST">
+                        {{ csrf_input }}
+                        <button type="submit" class="btn btn-success w-100 fs-5">Checkout Now</button>
+                    </form>
+                {% else %}
+                    <button class="btn btn-secondary w-100 fs-5" disabled>Checkout Now</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

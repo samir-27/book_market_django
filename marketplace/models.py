@@ -65,3 +65,15 @@ class SellerRating(models.Model):
 
 def __str__(self):
         return f"{self.rating} stars for {self.seller.username} from {self.buyer.username}"
+
+class CartItem(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart_items')
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        # Prevent a user from adding the exact same book to their cart twice
+        unique_together = ('user', 'book')
+
+    def __str__(self):
+        return f"{self.user.username}'s cart item: {self.book.title}"

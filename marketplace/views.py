@@ -3,7 +3,8 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Book, Wishlist, Order
+from django.contrib import messages
+from .models import Book, Wishlist, Order, CartItem
 from .forms import BookForm
 
 def book_list(request):
@@ -146,3 +147,69 @@ def sales_history(request):
     # Fetch orders where the current user is the seller
     sales = Order.objects.filter(seller=request.user).select_related('book', 'buyer').order_by('-purchase_date')
     return render(request, 'marketplace/sales_history.html', {'sales': sales})
+
+
+@login_required
+def add_to_cart(request, book_id):
+    if request.method == 'POST':
+        book = get_object_or_404(Book, id=book_id)
+        # Prevent adding sold books or your own books
+        if not book.is_sold and book.seller != request.user:
+            # get_or_create prevents errors if they spam the button
+            CartItem.objects.get_or_create(user=request.user, book=book)
+            messages.success(request, f"{book.title} added to your cart!")
+    return redirect('book_detail', book_id=book_id)
+
+@login_required
+def remove_from_cart(request, item_id):
+    if request.method == 'POST':
+        item = get_object_or_404(CartItem, id=item_id, user=request.user)
+        item.delete()
+        messages.info(request, "Item removed from cart.")
+    return redirect('view_cart')
+
+@login_required
+def view_cart(request):
+    cart_items = CartItem.objects.filter(user=request.user).select_related('book')
+    # Calculate the total price of all items in the cart
+    total_price = sum(item.book.price for item in cart_items if not item.book.is_sold)
+    
+    return render(request, 'marketplace/cart.html', {
+        'cart_items': cart_items,
+        'total_price': total_price
+    })
+
+@login_required
+def checkout_cart(request):
+    if request.method == 'POST':
+        cart_items = CartItem.objects.filter(user=request.user).select_related('book')
+        
+        if not cart_items:
+            return redirect('view_cart')
+            
+        successful_orders = 0
+        
+        for item in cart_items:
+            # Critical check: Did someone else buy it while it was sitting in our cart?
+            if not item.book.is_sold:
+                # 1. Create the Order
+                Order.objects.create(
+                    book=item.book,
+                    buyer=request.user,
+                    seller=item.book.seller,
+                    purchase_price=item.book.price
+                )
+                # 2. Mark book as sold
+                item.book.is_sold = True
+                item.book.save()
+                successful_orders += 1
+                
+        # Clear the user's cart entirely after checkout attempt
+        cart_items.delete()
+        
+        if successful_orders > 0:
+            messages.success(request, f"Successfully purchased {successful_orders} books!")
+        else:
+            messages.error(request, "Checkout failed. The books may have already been sold.")
+            
+        return redirect('order_history')

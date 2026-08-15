@@ -52,9 +52,9 @@
                 {% else %}
                     <!-- The standard buyer buttons -->
                     {% if request.user.is_authenticated %}
-                        <form action="{{ url('buy_book', args=[book.id]) }}" method="POST" class="d-inline">
+<form action="{{ url('add_to_cart', args=[book.id]) }}" method="POST" class="d-inline">
                             {{ csrf_input }}
-                            <button type="submit" class="btn btn-success me-md-2">💵 Buy Now</button>
+                            <button type="submit" class="btn btn-success me-md-2">🛒 Add to Cart</button>
                         </form>
                         
                         <form action="{{ url('toggle_wishlist', args=[book.id]) }}" method="POST" class="d-inline">
