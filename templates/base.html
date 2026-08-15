@@ -24,8 +24,10 @@
                     <button class="btn btn-outline-light" type="submit">Search</button>
                 </form>
 <ul class="navbar-nav ms-auto">
-{% if request.user.is_authenticated %}
-              
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item me-2">
+                            <a class="btn btn-outline-light" href="{{ url('my_wishlist') }}">❤️ My Wishlist</a>
+                        </li>
                         <li class="nav-item me-3">
                             <a class="btn btn-warning fw-bold" href="{{ url('sell_book') }}">+ Sell a Book</a>
                         </li>

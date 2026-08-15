@@ -33,10 +33,22 @@
             <li class="list-group-item px-0"><strong>Listed On:</strong> {{ book.created_at.strftime('%B %d, %Y') }}</li>
         </ul>
 
-        <div class="d-grid gap-2 d-md-block">
-            <!-- We will wire these up to real logic later -->
+<div class="d-grid gap-2 d-md-block mt-4">
             <button class="btn btn-primary me-md-2" type="button">Contact Seller</button>
-            <button class="btn btn-outline-danger" type="button">❤️ Add to Wishlist</button>
+            
+            {% if request.user.is_authenticated %}
+                <!-- Use a POST form for database changes -->
+                <form action="{{ url('toggle_wishlist', args=[book.id]) }}" method="POST" class="d-inline">
+                    {{ csrf_input }}
+                    {% if in_wishlist %}
+                        <button type="submit" class="btn btn-danger">💔 Remove from Wishlist</button>
+                    {% else %}
+                        <button type="submit" class="btn btn-outline-danger">❤️ Add to Wishlist</button>
+                    {% endif %}
+                </form>
+            {% else %}
+                <a href="{{ url('login') }}" class="btn btn-outline-secondary">Log in to Wishlist</a>
+            {% endif %}
         </div>
     </div>
 </div>

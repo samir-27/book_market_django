@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Book
+from .models import Book, Wishlist
 from .forms import BookForm
 
 def book_list(request):
@@ -24,10 +24,17 @@ def book_list(request):
     return render(request, 'marketplace/index.html', {'books': books})
 
 def book_detail(request, book_id):
-    # Fetch the exact book using its ID, or throw a 404 error if it doesn't exist
     book = get_object_or_404(Book, id=book_id)
     
-    return render(request, 'marketplace/book_detail.html', {'book': book})
+    # Check if the currently logged-in user has this book in their wishlist
+    in_wishlist = False
+    if request.user.is_authenticated:
+        in_wishlist = Wishlist.objects.filter(user=request.user, book=book).exists()
+        
+    return render(request, 'marketplace/book_detail.html', {
+        'book': book, 
+        'in_wishlist': in_wishlist
+    })
 
 def register_view(request):
     if request.method == 'POST':
@@ -76,3 +83,26 @@ def sell_book(request):
         form = BookForm()
         
     return render(request, 'marketplace/sell_book.html', {'form': form})
+
+@login_required
+def toggle_wishlist(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    
+    # Look for an existing wishlist entry for this user and book
+    wishlist_item = Wishlist.objects.filter(user=request.user, book=book).first()
+    
+    if wishlist_item:
+        # If it exists, remove it (toggle off)
+        wishlist_item.delete()
+    else:
+        # If it doesn't exist, create it (toggle on)
+        Wishlist.objects.create(user=request.user, book=book)
+        
+    return redirect('book_detail', book_id=book.id)
+
+@login_required
+def my_wishlist(request):
+    # Fetch all wishlist items for this user
+    # select_related('book') makes the database query much faster by grabbing book data at the same time
+    wishlist_items = Wishlist.objects.filter(user=request.user).select_related('book').order_by('-added_at')
+    return render(request, 'marketplace/wishlist.html', {'wishlist_items': wishlist_items})
