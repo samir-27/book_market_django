@@ -1,0 +1,22 @@
+<!-- templates/marketplace/login.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm mt-5">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Welcome Back</h3>
+                <form method="POST">
+                    {{ csrf_input }}
+                    {{ form.as_p() | safe }}
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Login</button>
+                </form>
+                <p class="text-center mt-3">
+                    Don't have an account? <a href="{{ url('register') }}">Register here</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
