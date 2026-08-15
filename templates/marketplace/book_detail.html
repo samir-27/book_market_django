@@ -1,0 +1,43 @@
+<!-- templates/marketplace/book_detail.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-3">
+    <!-- A quick back button to return to the homepage -->
+    <a href="{{ url('book_list') }}" class="text-decoration-none">&larr; Back to Listings</a>
+</div>
+
+<div class="row bg-white p-4 shadow-sm rounded">
+    <!-- Left Column: Book Image -->
+    <div class="col-md-4 mb-4 mb-md-0">
+        {% if book.photo %}
+            <img src="{{ book.photo.url }}" class="img-fluid rounded" alt="{{ book.title }}">
+        {% else %}
+            <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 400px;">
+                <span>No Image Available</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Right Column: Book Information -->
+    <div class="col-md-8">
+        <h2 class="mb-1">{{ book.title }}</h2>
+        <h4 class="text-muted mb-4">by {{ book.author }}</h4>
+        
+        <h3 class="text-primary mb-4">${{ book.price }}</h3>
+        
+        <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item px-0"><strong>Condition:</strong> {{ book.get_condition_display() }}</li>
+            <li class="list-group-item px-0"><strong>ISBN:</strong> {{ book.isbn or 'N/A' }}</li>
+            <li class="list-group-item px-0"><strong>Listed By:</strong> {{ book.seller.username }}</li>
+            <li class="list-group-item px-0"><strong>Listed On:</strong> {{ book.created_at.strftime('%B %d, %Y') }}</li>
+        </ul>
+
+        <div class="d-grid gap-2 d-md-block">
+            <!-- We will wire these up to real logic later -->
+            <button class="btn btn-primary me-md-2" type="button">Contact Seller</button>
+            <button class="btn btn-outline-danger" type="button">❤️ Add to Wishlist</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

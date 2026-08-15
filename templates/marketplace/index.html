@@ -31,8 +31,7 @@
             
             <!-- Action Button -->
             <div class="card-footer bg-white border-top-0 mt-auto">
-                <!-- We will wire this button up to the details page next! -->
-                <a href="#" class="btn btn-outline-primary w-100">View Details</a>
+                <a href="{{ url('book_detail', args=[book.id]) }}" class="btn btn-outline-primary w-100">View Details</a>
             </div>
             
         </div>
