@@ -15,4 +15,10 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+
+
+    # Transactions and History
+    path('book/<int:book_id>/buy/', views.buy_book, name='buy_book'),
+    path('orders/', views.order_history, name='order_history'),
+    path('sales/', views.sales_history, name='sales_history'),
 ]

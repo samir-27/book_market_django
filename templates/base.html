@@ -31,9 +31,16 @@
                         <li class="nav-item me-3">
                             <a class="btn btn-warning fw-bold" href="{{ url('sell_book') }}">+ Sell a Book</a>
                         </li>
-    
+    <!-- Add History Links -->
                         <li class="nav-item">
-                            <span class="nav-link text-white">Hello, {{ request.user.username }}</span>
+                            <a class="nav-link text-white" href="{{ url('order_history') }}">Purchases</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="{{ url('sales_history') }}">Sales</a>
+                        </li>
+                        <!-- Keep existing items -->
+                        <li class="nav-item">
+                            <span class="nav-link text-white-50">| Hello, {{ request.user.username }}</span>
                         </li>
                         <li class="nav-item">
                             <form action="{{ url('logout') }}" method="POST" class="d-inline">

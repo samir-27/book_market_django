@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Book, Wishlist
+from .models import Book, Wishlist, Order
 from .forms import BookForm
 
 def book_list(request):
@@ -106,3 +106,43 @@ def my_wishlist(request):
     # select_related('book') makes the database query much faster by grabbing book data at the same time
     wishlist_items = Wishlist.objects.filter(user=request.user).select_related('book').order_by('-added_at')
     return render(request, 'marketplace/wishlist.html', {'wishlist_items': wishlist_items})
+
+
+
+@login_required
+def buy_book(request, book_id):
+    # Only allow POST requests for purchasing
+    if request.method == 'POST':
+        book = get_object_or_404(Book, id=book_id)
+        
+        # Security checks: prevent buying sold books or buying your own book
+        if book.is_sold or book.seller == request.user:
+            return redirect('book_detail', book_id=book.id)
+            
+        # 1. Create the Order record
+        Order.objects.create(
+            book=book,
+            buyer=request.user,
+            seller=book.seller,
+            purchase_price=book.price
+        )
+        
+        # 2. Update the Book status
+        book.is_sold = True
+        book.save()
+        
+        return redirect('order_history')
+        
+    return redirect('book_list')
+
+@login_required
+def order_history(request):
+    # Fetch orders where the current user is the buyer
+    orders = Order.objects.filter(buyer=request.user).select_related('book', 'seller').order_by('-purchase_date')
+    return render(request, 'marketplace/order_history.html', {'orders': orders})
+
+@login_required
+def sales_history(request):
+    # Fetch orders where the current user is the seller
+    sales = Order.objects.filter(seller=request.user).select_related('book', 'buyer').order_by('-purchase_date')
+    return render(request, 'marketplace/sales_history.html', {'sales': sales})

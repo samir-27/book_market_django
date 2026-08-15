@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">My Purchases</h2>
+
+<div class="bg-white p-4 shadow-sm rounded">
+    {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Book</th>
+                        <th>Seller</th>
+                        <th>Price Paid</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td><a href="{{ url('book_detail', args=[order.book.id]) }}" class="text-decoration-none fw-bold">{{ order.book.title }}</a></td>
+                        <td>{{ order.seller.username }}</td>
+                        <td class="text-success">${{ order.purchase_price }}</td>
+                        <td>{{ order.purchase_date.strftime('%b %d, %Y') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info mb-0">You haven't bought any books yet!</div>
+    {% endif %}
+</div>
+{% endblock %}

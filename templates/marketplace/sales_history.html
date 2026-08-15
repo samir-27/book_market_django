@@ -1,0 +1,35 @@
+<!-- templates/marketplace/sales_history.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mb-4">My Sales History</h2>
+
+<div class="bg-white p-4 shadow-sm rounded">
+    {% if sales %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Book Sold</th>
+                        <th>Buyer</th>
+                        <th>Earnings</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in sales %}
+                    <tr>
+                        <td><a href="{{ url('book_detail', args=[sale.book.id]) }}" class="text-decoration-none fw-bold">{{ sale.book.title }}</a></td>
+                        <td>{{ sale.buyer.username }}</td>
+                        <td class="text-primary">${{ sale.purchase_price }}</td>
+                        <td>{{ sale.purchase_date.strftime('%b %d, %Y') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info mb-0">You haven't sold any books yet!</div>
+    {% endif %}
+</div>
+{% endblock %}
