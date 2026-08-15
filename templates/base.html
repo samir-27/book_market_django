@@ -18,6 +18,11 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                <form class="d-flex mx-auto w-50 my-2 my-lg-0" action="{{ url('book_list') }}" method="GET">
+                    <!-- request.GET.get('q', '') keeps the search term in the box after submitting -->
+                    <input class="form-control me-2" type="search" placeholder="Search title, author, or ISBN..." aria-label="Search" name="q" value="{{ request.GET.get('q', '') }}">
+                    <button class="btn btn-outline-light" type="submit">Search</button>
+                </form>
 <ul class="navbar-nav ms-auto">
 {% if request.user.is_authenticated %}
               

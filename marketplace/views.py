@@ -2,12 +2,25 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from .models import Book
 from .forms import BookForm
 
 def book_list(request):
-    # Fetch all books that are NOT sold, ordered by newest first
+    # Grab the search term from the URL (e.g., ?q=harry)
+    query = request.GET.get('q')
+    
+    # Start with all unsold books
     books = Book.objects.filter(is_sold=False).order_by('-created_at')
+    
+    # If a search query exists, filter the books further
+    if query:
+        books = books.filter(
+            Q(title__icontains=query) |
+            Q(author__icontains=query) |
+            Q(isbn__icontains=query)
+        )
+    
     return render(request, 'marketplace/index.html', {'books': books})
 
 def book_detail(request, book_id):
