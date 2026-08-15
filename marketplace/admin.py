@@ -6,7 +6,7 @@ from .models import Book, Wishlist, SellerRating
 # marketplace/admin.py
 
 from django.contrib import admin
-from .models import Book, Wishlist, SellerRating
+from .models import Book, Wishlist, SellerRating, Order
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
@@ -27,3 +27,8 @@ class SellerRatingAdmin(admin.ModelAdmin):
     list_display = ('seller', 'buyer', 'rating', 'created_at')
     list_filter = ('rating',)
     search_fields = ('seller__username', 'buyer__username')
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('book', 'buyer', 'seller', 'purchase_price', 'purchase_date')
+    list_filter = ('purchase_date',)

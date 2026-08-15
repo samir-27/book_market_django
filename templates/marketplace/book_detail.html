@@ -25,6 +25,13 @@
         <h4 class="text-muted mb-4">by {{ book.author }}</h4>
         
         <h3 class="text-primary mb-4">${{ book.price }}</h3>
+
+        {% if book.description %}
+            <div class="mb-4">
+                <h5>Description</h5>
+                <p>{{ book.description | replace('\n', '<br>') | safe }}</p>
+            </div>
+        {% endif %}
         
         <ul class="list-group list-group-flush mb-4">
             <li class="list-group-item px-0"><strong>Condition:</strong> {{ book.get_condition_display() }}</li>
